@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\MovimientoControlado.cs" />
+    <Compile Include="Assets\TestCollisionAndRays.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>/Users/alumno/Documents/GitHub/Area-51/GeraldFernandez2D/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
