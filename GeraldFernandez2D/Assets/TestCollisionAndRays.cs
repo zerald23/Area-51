@@ -5,29 +5,32 @@ using UnityEngine;
 public class TestCollisionAndRays : MonoBehaviour {
     float distance = 20f;
     Vector3 source, target;
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        source = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-        target = source + (Vector3.forward) * distance;
+    // Use this for initialization
+    void Start()
+    {
+        target = Vector3.forward * distance;
+    }
 
-        RaycastHit2D hit2D = Physics2D.Raycast (source, target);
+    // Update is called once per frame
+    void Update()
+    {
+        source = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hit2D = Physics2D.Raycast(source, target);
 
-        if (hit2D) {
+        if (hit2D)
+        {
             Debug.Log(hit2D.collider.name);
-        } 
-	} 
-
-	void OnGUI () {
-        GUI.Label(new Rect(0, 0, 100, 50), "This is a Label");
+        }
     }
 
-	void OnDrawGizmos () {
-        Gizmos.color = Color.green
-        Gizmos.DrawRay (source, target);
+    void OnGUI()
+    {
+        GUI.Label(new Rect(0, 0, 100, 50), "This is a label");
     }
-} 
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(source, target);
+    }
+}
