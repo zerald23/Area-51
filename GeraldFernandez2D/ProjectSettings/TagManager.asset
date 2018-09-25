@@ -6,6 +6,7 @@ TagManager:
   tags:
   - StaticBlock
   - MovableBlock
+  - WoodBox
   layers:
   - Default
   - TransparentFX
