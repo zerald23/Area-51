@@ -3,67 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities2D;
 
-public class MovimientoContinuo2D : MonoBehaviour {
+public class MovimientoInstantaneo2D : MonoBehaviour
+{
 
     public float speed;
+    public float limitRight, limitLeft;
+
     public List<AxisPair> axes;
 
     // Use this for initialization
-    void Start() {
+    void Start()
+    {
 
     }
 
     // Update is called once per frame
-    void Update() {
-        
-        Vector3 movement = Vector3.zero;
+    void Update()
+    {
         for (int i = 0; i < axes.Count; i++)
         {
-            if (Input.GetKey(axes[i].keyCode) && !FindObstacle(axes[i].direction))
+            if (Input.GetKeyDown(axes[i].keyCode) && !FindObstacle(axes[i].direction))
             {
-                movement += axes[i].direction;
+                transform.Translate(axes[i].direction);
             }
-        }
-        movement = movement.normalized * speed * Time.deltaTime;
-        transform.Translate(movement);
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Barrel"))
-        {
-            Debug.Log("Chocaste!");
-        }
-        else if (other.CompareTag("CamArea"))
-        {
-            Camera.main.GetComponent<CamControl>().SwitchTarget(other.transform, 7);
-        }
-        else if (other.CompareTag("Collectable"))
-        {
-            other.GetComponent<CollectableObject>().Collect();
-        }
-    }
-    void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("CamArea"))
-        {
-            Camera.main.GetComponent<CamControl>().SwitchTarget(null);
         }
     }
 
     bool FindObstacle(Vector3 direction)
     {
-        RaycastHit2D[] hits2D = Physics2D.RaycastAll(transform.position, direction, 0.5f);
-        Debug.DrawRay(transform.position, direction / 2, Color.green);
+        RaycastHit2D hit2D = Physics2D.Raycast(transform.position + direction, Vector3.forward);
 
-        foreach (RaycastHit2D hit2D in hits2D)
+        if (hit2D && hit2D.collider.CompareTag("MovableBlock"))
         {
-            if (hit2D.collider.CompareTag("StaticBlock"))
-            {
-                return true;
-            }
+            hit2D.collider.transform.Translate(direction);
         }
 
-        return false;
+        return hit2D ? hit2D.collider.CompareTag("StaticBlock") : false;
     }
 }
