@@ -40,7 +40,7 @@ public class MovimientoContinuo2D : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Barrel"))
+        if (other.CompareTag("Obstacle"))
         {
             GameControl.instance.RestarLevel();
         }
