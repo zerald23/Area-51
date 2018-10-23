@@ -4,18 +4,28 @@ using UnityEngine;
 using Utilities2D;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PhysicsPlatformMov2D : MonoBehaviour {
+public class PhysicsPlatformMov2D : MonoBehaviour
+{
 
     public Vector2 speed;
+    public Animator animator;
     public List<AxisPair> axes;
     public Rigidbody2D rb2D;
-    public float gravity = 8;
+    public Collider2D col2D;
+    public float gravity = 8f;
+    public float jumpForce = 7f;
     public bool grounded;
 
     Vector3 movement;
+    Vector2 distanceLeft;
+    Vector2 distanceRight;
+    const float margin = 0.01f;
+    const float minDistance = 0.1f;
+    public Vector2 pointLeft { get { return rb2D.position + distanceLeft; } }
+    public Vector2 pointRight { get { return rb2D.position + distanceRight; } }
 
-
-    void Reset() {
+    void Reset()
+    {
         rb2D = GetComponent<Rigidbody2D>();
         rb2D.gravityScale = 0;
         rb2D.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -24,7 +34,10 @@ public class PhysicsPlatformMov2D : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-
+        distanceLeft.x = -(col2D.bounds.extents.x - margin);
+        distanceLeft.y = -col2D.bounds.extents.y;
+        distanceRight.x = col2D.bounds.extents.x - margin;
+        distanceRight.y = -col2D.bounds.extents.y;
     }
 
     // Update is called once per frame
@@ -38,6 +51,12 @@ public class PhysicsPlatformMov2D : MonoBehaviour {
                 movement += axes[i].direction;
             }
         }
+
+        if (grounded && Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Jumping");
+            speed.y = jumpForce;
+        }
     }
 
     void FixedUpdate()
@@ -47,27 +66,45 @@ public class PhysicsPlatformMov2D : MonoBehaviour {
             speed.y -= gravity * Time.fixedDeltaTime;
         }
 
-        RaycastHit2D hit2D = Physics2D.Raycast(transform.position, Vector3.down, 0.55f);
-        if (hit2D)
-        {
-            Debug.Log(hit2D.collider.name);
-            speed.y = 0;
-            grounded = true;
-        }
-        else
-        {
-            grounded = false;
-        }
+        GroundCheck();
+
+        SpriteRenderer rend = GetComponent<SpriteRenderer>();
+        if (movement.x > 0 && rend.flipX) { rend.flipX = false; }
+        else if (movement.x < 0 && !rend.flipX) { rend.flipX = true; }
+
+        animator.SetBool("IsMoving", (movement.x != 0) && grounded);
 
         movement = movement.normalized * speed.x * Time.fixedDeltaTime;
         movement.y = speed.y * Time.fixedDeltaTime;
         rb2D.MovePosition(transform.position + movement);
     }
 
-    void OnDrawGizmos() {
+    void OnDrawGizmos()
+    {
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(pointleft, Vector3.down * minDistance);
-        Gizmos.DrawRay(pointright, Vector3.down * minDistance)
+        Gizmos.DrawRay(pointLeft, Vector3.down * minDistance);
+        Gizmos.DrawRay(pointRight, Vector3.down * minDistance);
+    }
 
+    void GroundCheck()
+    {
+        Vector2[] points = { pointLeft, pointRight };
+        RaycastHit2D[] hits2D = new RaycastHit2D[points.Length];
+        grounded = false;
+        for (int i = 0; i < points.Length; i++)
+        {
+            hits2D[i] = Physics2D.Raycast(points[i], Vector3.down, minDistance);
+            if (hits2D[i])
+            {
+                Debug.Log(hits2D[i].collider.name);
+                if (speed.y < 0)
+                {
+                    transform.position = (transform.position + (Vector3.down * minDistance));
+                    speed.y = 0;
+                }
+                grounded = true;
+                break;
+            }
+        }
     }
 }
